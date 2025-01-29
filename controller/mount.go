@@ -62,6 +62,9 @@ func wrapHandler(route *Route) []fiber.Handler {
 	if route.hasQueryFactory {
 		handlers = append(handlers, ValidateQueryMiddleware(route.queryStructFactory))
 	}
+	if len(route.middlewares) > 0 {
+		handlers = append(handlers, route.middlewares...)
+	}
 
 	handlers = append(handlers, route.handler)
 	return handlers

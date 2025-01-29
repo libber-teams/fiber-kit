@@ -12,16 +12,14 @@ const (
 	LOCAL_HEADER = "header"
 )
 
+// Um ponto importante é que o genérico do struct deve ser um ponteiro
 func GetBody[T any](c *fiber.Ctx) T {
 	return c.Locals(LOCAL_BODY).(T)
 }
 
+// Um ponto importante é que o genérico do struct deve ser um ponteiro
 func GetQuery[T any](c *fiber.Ctx) T {
 	return c.Locals(LOCAL_QUERY).(T)
-}
-
-func GetHeaders[T any](c *fiber.Ctx) T {
-	return c.Locals(LOCAL_HEADER).(T)
 }
 
 // Não válida se o parâmetro é um inteiro.
