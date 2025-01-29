@@ -13,27 +13,26 @@ func MountController(controller Controller, f *fiber.App) error {
 			panic(fmt.Errorf("Route %s does not have a handler", route.Path))
 		}
 
-		var fr fiber.Router
 		hasError := false
 		switch route.Method {
 		case "GET":
-			fr = f.Get(route.Path)
+			f.Get(route.Path, wrapHandler(route)...)
 		case "POST":
-			fr = f.Post(route.Path)
+			f.Post(route.Path, wrapHandler(route)...)
 		case "PUT":
-			fr = f.Put(route.Path)
+			f.Put(route.Path, wrapHandler(route)...)
 		case "DELETE":
-			fr = f.Delete(route.Path)
+			f.Delete(route.Path, wrapHandler(route)...)
 		case "PATCH":
-			fr = f.Patch(route.Path)
+			f.Patch(route.Path, wrapHandler(route)...)
 		case "OPTIONS":
-			fr = f.Options(route.Path)
+			f.Options(route.Path, wrapHandler(route)...)
 		case "HEAD":
-			fr = f.Head(route.Path)
+			f.Head(route.Path, wrapHandler(route)...)
 		case "CONNECT":
-			fr = f.Connect(route.Path)
+			f.Connect(route.Path, wrapHandler(route)...)
 		case "TRACE":
-			fr = f.Trace(route.Path)
+			f.Trace(route.Path, wrapHandler(route)...)
 		default:
 			errors = append(errors, fmt.Sprintf("Method %s not supported in %s", route.Method, route.Path))
 			hasError = true
@@ -41,15 +40,6 @@ func MountController(controller Controller, f *fiber.App) error {
 		if hasError {
 			continue
 		}
-
-		if route.hasBodyFactory {
-			fr.Use(ValidateBodyMiddleware(route.bodyStructFactory))
-		}
-		if route.hasQueryFactory {
-			fr.Use(ValidateQueryMiddleware(route.queryStructFactory))
-		}
-
-		fr.Use(route.handler)
 	}
 
 	if len(errors) > 0 {
@@ -62,4 +52,17 @@ func MountController(controller Controller, f *fiber.App) error {
 	}
 
 	return nil
+}
+
+func wrapHandler(route *Route) []fiber.Handler {
+	handlers := []fiber.Handler{}
+	if route.hasBodyFactory {
+		handlers = append(handlers, ValidateBodyMiddleware(route.bodyStructFactory))
+	}
+	if route.hasQueryFactory {
+		handlers = append(handlers, ValidateQueryMiddleware(route.queryStructFactory))
+	}
+
+	handlers = append(handlers, route.handler)
+	return handlers
 }
