@@ -6,6 +6,8 @@ type HttpError struct {
 	Status   int    `json:"status"`
 	Detail   string `json:"detail"`
 	Instance string `json:"instance"`
+
+	wrappedError error
 } // @name HttpError
 
 func NewHttpError(
@@ -119,5 +121,10 @@ func (dto *HttpError) SetDetail(detail string) *HttpError {
 
 func (dto *HttpError) SetInstance(instance string) *HttpError {
 	dto.Instance = instance
+	return dto
+}
+
+func (dto *HttpError) Wrap(err error) *HttpError {
+	dto.wrappedError = err
 	return dto
 }
